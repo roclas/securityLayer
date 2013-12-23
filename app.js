@@ -4,7 +4,7 @@ var users = [
   {id:0, username: 'carlos', password:'password'}
 ];
 
-var passport = require("passport"), express=require("express"),LocalStrategy = require('passport-local').Strategy;
+var passport = require("passport"), express=require("express"),LocalStrategy = require('passport-local').Strategy,fs=require('fs');
 var app = express();
 
 passport.serializeUser(function(user, done) {
@@ -27,6 +27,7 @@ passport.use(new LocalStrategy(function(username, password,done){
 }));
 
 app.use(express.cookieParser());
+//app.use(express.static(__dirname + '/public'));
 app.use(express.bodyParser());
 app.use(express.session({ secret: 'SECRET' }));
 app.use(passport.initialize());
@@ -57,8 +58,17 @@ app.get('/public',  function(req, res){
 app.get(/^\/./, function(req, res) {
   //if(req.isAuthenticated()) {
   if(req.session.passport.user) {
-   console.log('user logged in', req.user);
-   res.sendfile("./"+req.url);
+   console.log('user ', req.session.passport.user, " logged in");
+   try{
+	var f="./"+req.url;
+  	fs.stat(f, function(err, stats) {
+    	  if (err) {
+		res.status(404).sendfile('notfound.html');
+ 	  }else res.sendfile(f);
+	});
+   }catch(error){
+	res.status(404).sendfile('notfound.html');
+   }
   }else {
    console.log('user not logged in '+JSON.stringify(req.session.passport));
    res.sendfile('./login.html');
