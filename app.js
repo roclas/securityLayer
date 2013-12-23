@@ -4,7 +4,23 @@ var users = [
   {id:0, username: 'carlos', password:'password'}
 ];
 
-var passport = require("passport"), express=require("express"),LocalStrategy = require('passport-local').Strategy,fs=require('fs');
+var passport = require("passport"), express=require("express"),LocalStrategy = require('passport-local').Strategy,fs=require('fs'), jade = require('jade');
+
+/*
+fs.readFile('templates/login.tmpl', 'utf8', function (err, data) {
+    if (err) throw err;
+    var fn = jade.compile(data);
+    var htmlOutput = fn({
+      maintainer: {
+        name: 'Forbes Lindesay',
+        twitter: '@ForbesLindesay',
+        blog: 'forbeslindesay.co.uk'
+      }
+    });
+    console.log(htmlOutput);
+});
+*/
+
 var app = express();
 
 passport.serializeUser(function(user, done) {
@@ -16,7 +32,6 @@ passport.deserializeUser(function(id, done) {
 });
 
 passport.use(new LocalStrategy(function(username, password,done){
-	//console.log("authenticating "+username+" " +password);
         for(u in users){
          if(users[u].username == username ){
           if (password== users[u].password) return done(null, users[u]);
@@ -26,19 +41,26 @@ passport.use(new LocalStrategy(function(username, password,done){
         return done(null, false, { message: 'Incorrect username.' });
 }));
 
-app.use(express.cookieParser());
 //app.use(express.static(__dirname + '/public'));
+app.use(express.cookieParser());
 app.use(express.bodyParser());
 app.use(express.session({ secret: 'SECRET' }));
 app.use(passport.initialize());
+/*
+app.use(function(req, res,next){
+	console.log("middleware!!!");
+	next();
+});
+*/
 
 app.get('/', function(req, res) {
-   res.sendfile('./index.html');
+   if(req.session.attempting){
+	var redirect=req.session.attempting;
+	req.session.attempting=null;
+  	res.redirect(redirect);
+   }else res.sendfile('./index.html');
 });
 
-app.get('/login', function(req, res) {
-   res.sendfile('./login.html');
-});
 
 app.get('/logout',  function(req, res){
    if (req.session) {
@@ -55,6 +77,10 @@ app.get('/public',  function(req, res){
    res.sendfile('./public.html');
 });
 
+
+app.post('/login', passport.authenticate('local', { successRedirect: '/', failureRedirect: '/login' }));
+app.get('/login', function(req, res) { res.sendfile('./login.html'); });
+
 app.get(/^\/./, function(req, res) {
   //if(req.isAuthenticated()) {
   if(req.session.passport.user) {
@@ -70,13 +96,12 @@ app.get(/^\/./, function(req, res) {
 	res.status(404).sendfile('notfound.html');
    }
   }else {
+   req.session.attempting=req.url;
    console.log('user not logged in '+JSON.stringify(req.session.passport));
    res.sendfile('./login.html');
   }
 });
 
-
-app.post('/login', passport.authenticate('local', { successRedirect: '/', failureRedirect: '/login' }));
 app.use(passport.session());
 
 app.listen(3000);

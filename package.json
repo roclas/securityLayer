@@ -8,8 +8,8 @@
 	,"forever":">=0.10.10"
 	,"passport":">=0.1.17"
 	,"passport-local":">=0.1.6"
+	,"jade":">=1.0.0"
     },
-
     "engines"   : {
         "node": ">= 0.8.0"
     }
