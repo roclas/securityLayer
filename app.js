@@ -57,8 +57,8 @@ app.get('/public',  function(req, res){
 app.get(/^\/./, function(req, res) {
   //if(req.isAuthenticated()) {
   if(req.session.passport.user) {
-    console.log('user logged in', req.user);
-    res.redirect(req.url);
+   console.log('user logged in', req.user);
+   res.sendfile("./"+req.url);
   }else {
    console.log('user not logged in '+JSON.stringify(req.session.passport));
    res.sendfile('./login.html');
@@ -66,8 +66,7 @@ app.get(/^\/./, function(req, res) {
 });
 
 
-app.post('/login', passport.authenticate('local', { successRedirect: '/',
-                                                    failureRedirect: '/login' }));
+app.post('/login', passport.authenticate('local', { successRedirect: '/', failureRedirect: '/login' }));
 app.use(passport.session());
 
 app.listen(3000);
