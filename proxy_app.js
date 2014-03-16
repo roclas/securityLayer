@@ -7,7 +7,7 @@ var rest = require('restler');
 //var _=require('underscore');
 
 //var proxy = new httpProxy.RoutingProxy();
-var proxy = httpProxy.createProxyServer({target: { host: 'localhost', port: 9001 } });
+var proxy = httpProxy.createProxyServer({target: { host: bhost, port: bport } });
 
 var app = express();
 
@@ -62,7 +62,7 @@ app.all(/^\/.?/, function(req, res) {
 	//req.params=_.extend(req.params || {}, req.query || {}, req.body || {});
 	rest.put('http://'+bhost+':'+bport+req.url, req).on('complete', function(data, response) { res.end(data); });
   }else  if(req.method=="POST") { 
-	rest.post('http://localhost:9001'+req.url, req).on('complete', function(data, response) { res.end(data); });
+	rest.post('http://'+bhost+':'+bport+req.url, req).on('complete', function(data, response) { res.end(data); });
   }else 
    	proxy.web(req, res);
   }else {
