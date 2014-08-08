@@ -4,10 +4,13 @@ var users = [ {id:0, username: 'carlos', password:'password'} ];
 
 var passport = require("passport"), express=require("express"),LocalStrategy = require('passport-local').Strategy,fs=require('fs'), jade = require('jade'), httpProxy=require('http-proxy'), bhost="localhost", bport=9001;
 var rest = require('restler');
+var cookieParser = require('cookie-parser');
+var bodyParser = require('body-parser');
+var expressSession= require('express-session');
 //var _=require('underscore');
 
 //var proxy = new httpProxy.RoutingProxy();
-var proxy = httpProxy.createProxyServer({target: { host: bhost, port: bport } });
+var proxy = httpProxy.createProxyServer({target: { host: bhost, port: 8000} });
 
 var app = express();
 
@@ -29,9 +32,10 @@ passport.use(new LocalStrategy(function(username, password,done){
         return done(null, false, { message: 'Incorrect username.' });
 }));
 
-app.use(express.cookieParser());
-app.use(express.bodyParser());
-app.use(express.session({ secret: 'SECRET' }));
+
+app.use(cookieParser());
+app.use(bodyParser());
+app.use(expressSession({ secret: 'SECRET' }));
 app.use(passport.initialize());
 
 
@@ -50,7 +54,6 @@ app.get('/logout',  function(req, res){
 
 app.post('/login', passport.authenticate('local', { successRedirect: '/', failureRedirect: '/login' }));
 app.get('/login', function(req, res) { res.sendfile('./login.html'); });
-
 
 
 app.all(/^\/.?/, function(req, res) {
@@ -74,4 +77,4 @@ app.all(/^\/.?/, function(req, res) {
 
 app.use(passport.session());
 
-app.listen(80);
+app.listen(8801);
