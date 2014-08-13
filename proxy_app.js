@@ -10,13 +10,12 @@ var app = express();
 app.use(expressSession({ secret: 'SECRET' }));
 
 
-
-//app.use(function(req, res, next) {
 var auth=function(req,res,next){
   if (!req.session || !req.session.user_id) {
     res.redirect('/login');
     //res.send('You are not authorized to view this page');
   } else {
+    req.headers['iv-user']='root';
     next();
   }
 }
@@ -51,7 +50,6 @@ app.get('/logout', auth,function (req, res) {
 }); 
 
 
-//app.all(/^\/.?/,auth, function(req, res) {
 app.all(/^\/.?/, auth,function(req, res) {
 	proxy.web(req, res);
 });

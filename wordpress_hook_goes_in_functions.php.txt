@@ -1,0 +1,8 @@
+function loginThroughProxy() {
+        $headers=getallheaders();
+        if($headers["iv-user"]){
+                wp_set_current_user( 1, "myuser" );
+        }
+}
+add_action( 'after_setup_theme', 'loginThroughProxy' ); 
+
