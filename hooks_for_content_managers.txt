@@ -1,0 +1,23 @@
+/////////////////////////////
+/////HOOK FOR WORDPRESS////// (could go into the theme's functions.php)
+/////////////////////////////
+function loginThroughProxy() {
+        $headers=getallheaders();
+	if (array_key_exists('iv-user',$headers)){
+                wp_set_current_user( 1, "myuser" );
+        }
+}
+add_action( 'after_setup_theme', 'loginThroughProxy' ); 
+
+
+//////////////////////////
+/////HOOK FOR DRUPAL////// (could go into the theme's template.php)
+//////////////////////////
+$headers=getallheaders();
+if (array_key_exists('iv-user',$headers)){
+        global $user;
+        $user = user_load(1);
+}
+
+
+
